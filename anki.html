@@ -113,7 +113,7 @@
     .audio-meta .resync-feedback button.active { color:var(--accent); background:rgba(144,214,174,.08); }
     .audio-meta .resync-feedback button.adjust.active { color:#f0c078; background:rgba(240,192,120,.08); }
     .audio-meta .resync-feedback svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:1.9; }
-    .audio-meta .resync-hints { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) 32px; grid-template-rows:32px 56px 0; align-items:center; justify-content:space-between; column-gap:0; row-gap:0; min-height:120px; overflow:hidden; padding:16px; border-top:1px solid var(--line); border-radius:12px; background:rgba(25,27,32,.7); transition:grid-template-rows .3s cubic-bezier(.2,.75,.25,1), min-height .3s cubic-bezier(.2,.75,.25,1); }
+    .audio-meta .resync-hints { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) 32px 40px; grid-template-rows:32px 56px 0; align-items:center; justify-content:space-between; column-gap:0; row-gap:0; min-height:120px; overflow:hidden; padding:16px; border-top:1px solid var(--line); border-radius:12px; background:rgba(25,27,32,.7); transition:grid-template-rows .3s cubic-bezier(.2,.75,.25,1), min-height .3s cubic-bezier(.2,.75,.25,1); }
     .audio-meta .resync-hints.has-confirmation { grid-template-rows:32px 56px 104px; min-height:224px; }
     .audio-meta .resync-hints.is-concealed { visibility:hidden; pointer-events:none; }
     .study-card .resync-hint { grid-template-columns:58px minmax(0,1fr); gap:8px; }
@@ -121,8 +121,10 @@
     .adjust-control { display:grid; grid-template-columns:32px 64px 32px; align-items:center; gap:8px; }
     .adjust-control button { width:32px; height:32px; padding:0; border-radius:50%; }
     .adjust-value { display:grid; place-items:center; width:64px; height:32px; color:var(--ink); font-size:.78rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
-    .resync-save { display:grid; place-items:center; width:32px; height:32px; margin-left:8px; padding:0; border-radius:50%; color:var(--muted); line-height:0; }
-    .resync-save svg { display:block; width:17px; height:17px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:1.9; }
+    .resync-unknown, .resync-save { display:grid; place-items:center; width:32px; height:32px; padding:0; border-radius:50%; line-height:0; }
+    .resync-unknown { grid-column:3; color:#f0c078; border-color:rgba(240,192,120,.55); background:rgba(240,192,120,.06); }
+    .resync-save { grid-column:4; margin-left:8px; color:var(--muted); }
+    .resync-unknown svg, .resync-save svg { display:block; width:17px; height:17px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:1.9; }
     .resync-save.pending { color:var(--accent); border-color:rgba(144,214,174,.65); background:rgba(144,214,174,.08); }
     .clip-waveform { --clip-start:18%; --clip-end:82%; position:relative; align-self:end; grid-column:1 / -1; grid-row:2; height:40px; overflow:hidden; border-radius:8px; background:linear-gradient(90deg,rgba(255,255,255,.015),rgba(255,255,255,.035),rgba(255,255,255,.015)); }
     .clip-waveform svg { position:absolute; inset:0; width:100%; height:100%; }
@@ -158,7 +160,7 @@
     .study-card .actions #audio-play { flex:0 0 73px; width:73px; height:73px; aspect-ratio:1; color:var(--player); border-color:rgba(119,186,255,.7); background:rgba(119,186,255,.08); }
     .study-card .actions #audio-play svg { width:29px; height:29px; }
     .study-card .actions .known { color:var(--accent); border-color:rgba(144,214,174,.65); background:rgba(144,214,174,.06); }
-    @media (max-width:420px) { main { padding:32px 16px; } .study-main { padding:24px; } .study-footer { padding:16px; } .audio-meta .resync-hints { grid-template-columns:minmax(0,1fr) 32px; grid-template-rows:28px 28px 48px 0; min-height:120px; padding:8px; } .audio-meta .resync-hints.has-confirmation { grid-template-rows:28px 28px 48px 104px; min-height:224px; } .study-card .resync-hint { grid-column:1; grid-template-columns:58px minmax(0,1fr); gap:4px; } .study-card .resync-hint:nth-of-type(1) { grid-row:1; } .study-card .resync-hint:nth-of-type(2) { grid-row:2; } .study-card .resync-hint + .resync-hint { margin-left:0; padding-left:0; border-left:0; border-top:0; padding-top:0; } .adjust-control { grid-template-columns:28px 58px 28px; gap:4px; } .adjust-control button, .resync-save { width:28px; height:28px; } .adjust-value { width:58px; height:28px; font-size:.72rem; } .resync-save { grid-column:2; grid-row:1 / span 2; align-self:center; justify-self:end; margin-left:0; } .clip-waveform { grid-row:3; height:32px; } .resync-confirm { grid-row:4; gap:8px; padding:8px; } .resync-confirm p { font-size:.875rem; } .resync-confirm-actions { gap:4px; } .resync-confirm-actions button { padding:8px; } .resync-toasts { right:16px; bottom:16px; } }
+    @media (max-width:420px) { main { padding:32px 16px; } .study-main { padding:24px; } .study-footer { padding:16px; } .audio-meta .resync-hints { grid-template-columns:minmax(0,1fr) 28px 36px; grid-template-rows:28px 28px 48px 0; min-height:120px; padding:8px; } .audio-meta .resync-hints.has-confirmation { grid-template-rows:28px 28px 48px 104px; min-height:224px; } .study-card .resync-hint { grid-column:1; grid-template-columns:58px minmax(0,1fr); gap:4px; } .study-card .resync-hint:nth-of-type(1) { grid-row:1; } .study-card .resync-hint:nth-of-type(2) { grid-row:2; } .study-card .resync-hint + .resync-hint { margin-left:0; padding-left:0; border-left:0; border-top:0; padding-top:0; } .adjust-control { grid-template-columns:28px 58px 28px; gap:4px; } .adjust-control button, .resync-unknown, .resync-save { width:28px; height:28px; } .adjust-value { width:58px; height:28px; font-size:.72rem; } .resync-unknown { grid-column:2; grid-row:1 / span 2; align-self:center; justify-self:start; } .resync-save { grid-column:3; grid-row:1 / span 2; align-self:center; justify-self:end; margin-left:8px; } .clip-waveform { grid-row:3; height:32px; } .resync-confirm { grid-row:4; gap:8px; padding:8px; } .resync-confirm p { font-size:.875rem; } .resync-confirm-actions { gap:4px; } .resync-confirm-actions button { padding:8px; } .resync-toasts { right:16px; bottom:16px; } }
     @media (max-width:420px) { header { display:flex; } .tools { margin-top:0; } .actions { grid-template-columns:1fr; } .reveal { grid-row:1; } }
   </style>
 </head>
@@ -217,7 +219,7 @@
       const readUiState = () => { try { return { ...defaultUiState, ...JSON.parse(localStorage.getItem(uiStateKey) || '{}') }; } catch (_) { return { ...defaultUiState }; } };
       let uiState = readUiState();
       const writeUiState = () => { try { localStorage.setItem(uiStateKey, JSON.stringify(uiState)); } catch (_) {} };
-      let deck = null, fileHandle = null, directoryHandle = null, activeAudio = null, activeObjectUrl = '', showPhonetic = uiState.showPhonetic, revealed = false, pointerStart = null, resyncPanelOpen = false, resyncDirty = false, resyncConfirmOpen = false, resetConfirmOpen = false;
+      let deck = null, fileHandle = null, directoryHandle = null, activeAudio = null, activeObjectUrl = '', showPhonetic = uiState.showPhonetic, revealed = false, pointerStart = null, resyncPanelOpen = false, resyncDirty = false, resyncConfirmOpen = false, resyncConfirmMode = '', resetConfirmOpen = false;
       let downloadState = { cards:[], completed:0, failed:[], running:false }, reviewTotal = 0;
 
       const toIso = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
@@ -236,7 +238,8 @@
       }[name]);
       const syncIcon = name => ({
         perfect: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v9H4v-9M7 11l5-7c.8 0 1.5.7 1.5 1.5V9H19c1 0 1.7.9 1.5 1.9l-1.2 7A2 2 0 0 1 17.3 20H7"></path></svg>',
-        adjust: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16M9 4v6M15 14v6"></path></svg>'
+        adjust: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16M9 4v6M15 14v6"></path></svg>',
+        unknown: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M9.7 9.2a2.4 2.4 0 1 1 3.8 2c-.9.65-1.5 1.08-1.5 2.3M12 17.4h.01"></path></svg>'
       }[name]);
       const waveformBars = [10,14,18,22,16,26,20,30,24,14,19,25,17,29,22,32,18,27,15,23,30,19,26,21,31,16,28,20,24,14,29,22,32,18,26,12,20,30,17,25,15,28,20,31,16,23,29,18,26,14,22,32,17,25,15,20].map((height, index) => `<rect x="${index * 6.8 + 1.7}" y="${(38 - height) / 2}" width="3.4" height="${height}" rx="1.7"></rect>`).join('');
 
@@ -346,7 +349,10 @@
         const adjustment = (label, key, value) => {
           return `<div class="resync-hint"><span>${label}</span><div class="adjust-control"><button type="button" data-resync-hint="${key}" data-delta="-50" aria-label="Diminuir ${label} em 50 milissegundos">−</button><output class="adjust-value">${value > 0 ? '+' : ''}${value} ms</output><button type="button" data-resync-hint="${key}" data-delta="50" aria-label="Aumentar ${label} em 50 milissegundos">+</button></div></div>`;
         };
-        return `<div class="resync-hints${resyncPanelOpen ? '' : ' is-concealed'}" id="resync-hints" aria-hidden="${String(!resyncPanelOpen)}">${adjustment('Começo', 'start', startHint)}${adjustment('Fim', 'end', endHint)}<button type="button" class="resync-save${resyncDirty ? ' pending' : ''}" id="resync-save" ${resyncDirty ? '' : 'disabled'} aria-label="Salvar ajustes de sincronismo" title="Salvar ajustes de sincronismo" aria-expanded="${String(resyncConfirmOpen)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5zM8 3v6h8V3M8 21v-7h8v7"></path></svg></button><div class="clip-waveform" id="resync-waveform" aria-hidden="true" style="--clip-start:${bounds.start}%;--clip-end:${bounds.end}%"><svg class="wave-base" viewBox="0 0 380 38" preserveAspectRatio="none">${waveformBars}</svg><svg class="wave-fill" viewBox="0 0 380 38" preserveAspectRatio="none">${waveformBars}</svg></div><div class="resync-confirm${resyncConfirmOpen ? '' : ' is-concealed'}" id="resync-confirm" role="group" aria-label="Confirmar salvamento de ajustes" aria-hidden="${String(!resyncConfirmOpen)}"><p>Salvar ajustes de sync?</p><div class="resync-confirm-actions"><button type="button" id="resync-cancel">Cancelar</button><button type="button" class="confirm" id="resync-confirm-save">Salvar</button></div></div></div>`;
+        const unknownConfirmation = resyncConfirmMode === 'unknown';
+        const confirmationText = unknownConfirmation ? 'Resync necessário' : 'Salvar ajustes de sync?';
+        const confirmationAction = unknownConfirmation ? 'Confirmar' : 'Salvar';
+        return `<div class="resync-hints${resyncPanelOpen ? '' : ' is-concealed'}" id="resync-hints" aria-hidden="${String(!resyncPanelOpen)}">${adjustment('Começo', 'start', startHint)}${adjustment('Fim', 'end', endHint)}<button type="button" class="resync-unknown" id="resync-unknown" aria-label="Marcar resync necessário sem indicar correção" title="Resync necessário">${syncIcon('unknown')}</button><button type="button" class="resync-save${resyncDirty ? ' pending' : ''}" id="resync-save" ${resyncDirty ? '' : 'disabled'} aria-label="Salvar ajustes de sincronismo" title="Salvar ajustes de sincronismo" aria-expanded="${String(resyncConfirmOpen)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5zM8 3v6h8V3M8 21v-7h8v7"></path></svg></button><div class="clip-waveform" id="resync-waveform" aria-hidden="true" style="--clip-start:${bounds.start}%;--clip-end:${bounds.end}%"><svg class="wave-base" viewBox="0 0 380 38" preserveAspectRatio="none">${waveformBars}</svg><svg class="wave-fill" viewBox="0 0 380 38" preserveAspectRatio="none">${waveformBars}</svg></div><div class="resync-confirm${resyncConfirmOpen ? '' : ' is-concealed'}" id="resync-confirm" role="group" aria-label="${confirmationText}" aria-hidden="${String(!resyncConfirmOpen)}"><p>${confirmationText}</p><div class="resync-confirm-actions"><button type="button" id="resync-cancel">Cancelar</button><button type="button" class="confirm" id="resync-confirm-save">${confirmationAction}</button></div></div></div>`;
       }
       function showResyncToast(message, tone = 'success') {
         const toast = document.createElement('div');
@@ -398,8 +404,15 @@
         }
         const confirmation = document.querySelector('#resync-confirm');
         if (confirmation) {
+          const unknownConfirmation = resyncConfirmMode === 'unknown';
+          const message = unknownConfirmation ? 'Resync necessário' : 'Salvar ajustes de sync?';
           confirmation.classList.toggle('is-concealed', !resyncConfirmOpen);
+          confirmation.setAttribute('aria-label', message);
           confirmation.setAttribute('aria-hidden', String(!resyncConfirmOpen));
+          const text = confirmation.querySelector('p');
+          const action = confirmation.querySelector('#resync-confirm-save');
+          if (text) text.textContent = message;
+          if (action) action.textContent = unknownConfirmation ? 'Confirmar' : 'Salvar';
         }
       }
       function audioCaptionMarkup(card) {
@@ -613,7 +626,7 @@
 
       function render(keepResyncPanel = false) {
         stopAudio();
-        if (!keepResyncPanel) { resyncPanelOpen = false; resyncConfirmOpen = false; }
+        if (!keepResyncPanel) { resyncPanelOpen = false; resyncConfirmOpen = false; resyncConfirmMode = ''; }
         if (!deck) { setStage(false); return; }
         setStage(true);
         const card = currentDueCard(); showStatus();
@@ -640,9 +653,22 @@
         });
         document.querySelectorAll('[data-resync-feedback]').forEach(button => button.addEventListener('click', () => {
           const feedback = button.dataset.resyncFeedback;
+          if (feedback === 'perfect-sync') {
+            card.resyncFeedback = 'perfect-sync';
+            card.resyncStartHintMs = 0;
+            card.resyncEndHintMs = 0;
+            resyncPanelOpen = false;
+            resyncDirty = true;
+            resyncConfirmOpen = false;
+            resyncConfirmMode = '';
+            updateResyncUi(card);
+            showResyncToast('Sync perfeito!');
+            return;
+          }
           if (feedback === 'reajustar' && card.resyncFeedback === 'reajustar') {
             resyncPanelOpen = !resyncPanelOpen;
             resyncConfirmOpen = false;
+            resyncConfirmMode = '';
             updateResyncUi(card);
             return;
           }
@@ -654,6 +680,7 @@
           } else resyncPanelOpen = false;
           resyncDirty = true;
           resyncConfirmOpen = false;
+          resyncConfirmMode = '';
           updateResyncUi(card);
         }));
         document.querySelectorAll('[data-resync-hint]').forEach(button => button.addEventListener('click', () => {
@@ -661,24 +688,42 @@
           card[key] = Math.max(-500, Math.min(500, Number(card[key] || 0) + Number(button.dataset.delta)));
           resyncDirty = true;
           resyncConfirmOpen = false;
+          resyncConfirmMode = '';
           updateResyncUi(card);
         }));
         document.querySelector('#resync-save')?.addEventListener('click', () => {
           if (!resyncDirty) return;
+          resyncConfirmMode = 'save';
+          resyncConfirmOpen = true;
+          updateResyncUi(card);
+        });
+        document.querySelector('#resync-unknown')?.addEventListener('click', () => {
+          resyncPanelOpen = true;
+          resyncConfirmMode = 'unknown';
           resyncConfirmOpen = true;
           updateResyncUi(card);
         });
         document.querySelector('#resync-cancel')?.addEventListener('click', () => {
           resyncConfirmOpen = false;
+          resyncConfirmMode = '';
           updateResyncUi(card);
         });
         document.querySelector('#resync-confirm-save')?.addEventListener('click', async () => {
+          const isUnknownResync = resyncConfirmMode === 'unknown';
+          if (isUnknownResync) {
+            card.resyncFeedback = 'reajustar';
+            card.resyncStartHintMs = 0;
+            card.resyncEndHintMs = 0;
+            resyncDirty = true;
+            updateResyncUi(card);
+          }
           const result = await saveDeck();
           if (result === 'failed') { showResyncToast('Não foi possível salvar. Tente novamente.', 'error'); return; }
           resyncDirty = false;
           resyncConfirmOpen = false;
+          resyncConfirmMode = '';
           updateResyncUi(card);
-          showResyncToast(result === 'written' ? 'Resync salvo no anki.md.' : 'anki.md atualizado e baixado.');
+          showResyncToast(result === 'written' ? (isUnknownResync ? 'Resync necessário salvo no anki.md.' : 'Resync salvo no anki.md.') : 'anki.md atualizado e baixado.');
         });
         setupAudioPlayer(card);
         cardEl.addEventListener('pointerdown', event => {
@@ -722,19 +767,19 @@
         writeUiState();
         render();
       }
-      function loadText(text, name = 'anki.md') { try { deck = parseDeck(text); resyncDirty = false; resyncConfirmOpen = false; resetConfirmOpen = false; if (!deck.cards.length) { setStage(true); showStatus(); empty('Ainda não há cartões. Peça à skill Diário Deutsch para registrar frases, palavras ou gramática.', 'Baralho vazio'); return; } reviewTotal = dueCards().length; statusEl.textContent = `${name} importado.`; render(); void startAudioDownloads(); } catch (error) { deck = null; setStage(false); statusEl.textContent = 'Não foi possível ler este arquivo.'; } }
+      function loadText(text, name = 'anki.md') { try { deck = parseDeck(text); resyncDirty = false; resyncConfirmOpen = false; resyncConfirmMode = ''; resetConfirmOpen = false; if (!deck.cards.length) { setStage(true); showStatus(); empty('Ainda não há cartões. Peça à skill Diário Deutsch para registrar frases, palavras ou gramática.', 'Baralho vazio'); return; } reviewTotal = dueCards().length; statusEl.textContent = `${name} importado.`; render(); void startAudioDownloads(); } catch (error) { deck = null; setStage(false); statusEl.textContent = 'Não foi possível ler este arquivo.'; } }
       async function openWithPicker() { try { [fileHandle] = await window.showOpenFilePicker({ types:[{ description:'Markdown', accept:{ 'text/markdown':['.md'], 'text/plain':['.md'] } }] }); const file = await fileHandle.getFile(); loadText(await file.text(), file.name); } catch (error) { if (error.name !== 'AbortError') statusEl.textContent = 'Não foi possível abrir o arquivo.'; } }
       async function saveDeck() { if (!deck) return 'failed'; const contents = serializeDeck(deck); try { if (fileHandle?.createWritable) { const writable = await fileHandle.createWritable(); await writable.write(contents); await writable.close(); statusEl.textContent = 'anki.md salvo com o histórico atualizado.'; if (directoryHandle) await listDirectoryDecks(); return 'written'; } } catch (_) { statusEl.textContent = 'Não foi possível gravar diretamente; o download foi preparado.'; }
         const url = URL.createObjectURL(new Blob([contents], {type:'text/markdown;charset=utf-8'})); const link = Object.assign(document.createElement('a'), {href:url, download:'anki.md'}); link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); return 'downloaded'; }
       function bindDropZone() { const zone = document.querySelector('#drop-zone'); if (!zone) return; ['dragenter','dragover'].forEach(type => zone.addEventListener(type, event => { event.preventDefault(); zone.classList.add('drag'); })); ['dragleave','drop'].forEach(type => zone.addEventListener(type, event => { event.preventDefault(); zone.classList.remove('drag'); })); zone.addEventListener('drop', event => { const file = event.dataTransfer.files[0]; if (file) file.text().then(text => loadText(text, file.name)); }); }
       fileInput.addEventListener('change', event => { const file = event.target.files[0]; if (file) { fileHandle = null; file.text().then(text => loadText(text, file.name)); } });
-      saveButton.addEventListener('click', async () => { const result = await saveDeck(); if (result !== 'failed') { resyncDirty = false; resyncConfirmOpen = false; const card = currentDueCard(); if (card) updateResyncUi(card); } });
+      saveButton.addEventListener('click', async () => { const result = await saveDeck(); if (result !== 'failed') { resyncDirty = false; resyncConfirmOpen = false; resyncConfirmMode = ''; const card = currentDueCard(); if (card) updateResyncUi(card); } });
       downloadRetry.addEventListener('click', () => { const failed = [...downloadState.failed]; downloadState.failed = []; void startAudioDownloads(failed); });
       phoneticToggle.addEventListener('click', () => { showPhonetic = !showPhonetic; uiState.showPhonetic = showPhonetic; writeUiState(); render(); });
       document.querySelector('#audio-loop').addEventListener('click', () => { uiState.loop = !uiState.loop; if (activeAudio) activeAudio.loop = uiState.loop; writeUiState(); updatePhoneticToggle(); });
       document.querySelectorAll('.audio-rate').forEach(button => button.addEventListener('click', () => { uiState.playbackRate = Number(button.dataset.rate); if (activeAudio) activeAudio.playbackRate = uiState.playbackRate; writeUiState(); updatePhoneticToggle(); }));
       settingsToggle.addEventListener('click', () => { settingsPanel.hidden = !settingsPanel.hidden; settingsToggle.setAttribute('aria-expanded', String(!settingsPanel.hidden)); });
-      changeDeck.addEventListener('click', () => { stopAudio(); deck = null; fileHandle = null; resyncDirty = false; resyncConfirmOpen = false; resetConfirmOpen = false; render(); });
+      changeDeck.addEventListener('click', () => { stopAudio(); deck = null; fileHandle = null; resyncDirty = false; resyncConfirmOpen = false; resyncConfirmMode = ''; resetConfirmOpen = false; render(); });
       updatePhoneticToggle();
       if ('showOpenFilePicker' in window) { openButton.hidden = false; openButton.addEventListener('click', openWithPicker); }
       if ('showDirectoryPicker' in window) { folderButton.hidden = false; folderButton.addEventListener('click', chooseDirectory); resumeButton.addEventListener('click', resumeDirectory); restoreDirectory(); }
