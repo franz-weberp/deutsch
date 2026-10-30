@@ -5,7 +5,7 @@ Este arquivo é a fonte única do seu baralho e do histórico de revisão. Impor
 ## Progresso
 
 <!-- diario-deutsch-progresso: modulo=Módulo 1; aula=Aula 1; proximo=Revisar as frases de apresentação do vídeo Easy German 258 -->
-<!-- diario-deutsch-audio-source: base=https://raw.githubusercontent.com/franz-weberp/deutsch/7e78d186950134b58d6e650b59e3532dad07d78e/; revision=audio-v3-20261030202946 -->
+<!-- diario-deutsch-audio-source: base=https://raw.githubusercontent.com/franz-weberp/deutsch/c102455120da39854135f323f295c95c83234138/; revision=audio-v3-20261030202946 -->
 
 Você está em **Módulo 1 — Aula 1**. Próximo passo: Revisar as frases de apresentação do vídeo Easy German 258.
 
