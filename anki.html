@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diário Deutsch — Revisão</title>
+  <style>
+    :root { color-scheme: dark; --bg:#101113; --surface:#191b20; --line:#30333a; --ink:#f1f2f4; --muted:#a9adb7; --accent:#90d6ae; --danger:#f09a9a; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; background:radial-gradient(circle at 50% 0,#242832 0,var(--bg) 45%); color:var(--ink); font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { width:min(100%,560px); padding:24px 18px 32px; }
+    header { display:flex; justify-content:space-between; align-items:start; gap:12px; margin-bottom:24px; }
+    h1 { margin:0; font-size:1.25rem; letter-spacing:.02em; }
+    p { margin:0; color:var(--muted); }
+    .tools { display:flex; gap:8px; flex-wrap:wrap; justify-content:end; }
+    button, .file-label { border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); font:inherit; padding:9px 12px; cursor:pointer; transition:transform .15s, background .15s, border-color .15s; }
+    button:hover, .file-label:hover { background:#262a31; border-color:#555b67; }
+    button:active { transform:scale(.97); }
+    button:disabled { cursor:not-allowed; opacity:.45; }
+    input[type=file] { display:none; }
+    #deck-status { min-height:24px; font-size:.9rem; margin-bottom:12px; }
+    .deck { position:relative; min-height:390px; }
+    .drop-zone { min-height:390px; display:grid; place-items:center; border:1px dashed #555b67; border-radius:20px; color:var(--muted); text-align:center; padding:28px; }
+    .drop-zone.drag { border-color:var(--accent); background:rgba(144,214,174,.08); }
+    .card { min-height:390px; display:flex; flex-direction:column; justify-content:space-between; padding:26px; border:1px solid var(--line); border-radius:20px; background:linear-gradient(135deg,#20232a,#17191d); box-shadow:0 20px 50px rgba(0,0,0,.25); touch-action:none; user-select:none; }
+    .card.swipe-left { animation:out-left .25s ease both; } .card.swipe-right { animation:out-right .25s ease both; }
+    @keyframes out-left { to { opacity:0; transform:translateX(-120%) rotate(-12deg); } } @keyframes out-right { to { opacity:0; transform:translateX(120%) rotate(12deg); } }
+    .tag { color:var(--accent); font-weight:700; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; }
+    .question { display:flex; flex-wrap:wrap; align-content:start; gap:8px 12px; margin:28px 0 auto; font-size:clamp(1.7rem,7vw,2.5rem); line-height:1.2; overflow-wrap:anywhere; }
+    .word-pair { display:grid; justify-items:center; }
+    .karaoke-word { --karaoke-fill:0%; background:linear-gradient(90deg,var(--accent) 0 var(--karaoke-fill),var(--ink) var(--karaoke-fill) 100%); -webkit-background-clip:text; background-clip:text; color:transparent; transition:background .06s linear; }
+    .phonetic-word { color:var(--accent); font-size:.43em; font-style:italic; line-height:1.3; white-space:nowrap; }
+    .answer { margin:20px 0 0; padding-top:18px; border-top:1px solid var(--line); color:#d8dbe1; }
+    .answer[hidden] { display:none; }
+    .source { margin-top:18px; font-size:.85rem; color:var(--muted); }
+    .audio-player { display:grid; gap:10px; margin-top:14px; padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+    .audio-head { display:flex; justify-content:space-between; gap:10px; color:var(--muted); font-size:.82rem; }
+    .sync-state { color:var(--accent); }
+    .sync-state.missing { color:var(--muted); }
+    .audio-controls { display:flex; gap:8px; flex-wrap:wrap; }
+    .audio-controls button.active { border-color:var(--accent); color:var(--accent); }
+    .audio-source { color:var(--muted); font-size:.8rem; }
+    .audio-source a { color:var(--accent); }
+    .resync-feedback { display:flex; gap:8px; flex-wrap:wrap; }
+    .resync-feedback button.active { border-color:var(--accent); color:var(--accent); }
+    .resync-feedback button.adjust.active { border-color:var(--danger); color:var(--danger); }
+    .resync-hints { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding-top:2px; }
+    .resync-hint { display:grid; grid-template-columns:auto auto 1fr auto; align-items:center; gap:6px; color:var(--muted); font-size:.78rem; }
+    .resync-hint button { padding:5px 8px; border-radius:7px; }
+    .resync-hint output { text-align:center; color:var(--ink); font-variant-numeric:tabular-nums; }
+    .download-panel { display:grid; gap:8px; margin:0 0 14px; padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+    .download-panel[hidden] { display:none; }
+    .download-progress { display:flex; justify-content:space-between; gap:10px; color:var(--muted); font-size:.85rem; }
+    .actions { display:grid; grid-template-columns:1fr auto 1fr; gap:10px; margin-top:18px; }
+    .again { color:var(--danger); } .known { color:var(--accent); } .reveal { color:var(--ink); }
+    .hint { text-align:center; font-size:.8rem; color:var(--muted); margin:14px 0 0; }
+    .empty { text-align:center; padding:64px 22px; border:1px solid var(--line); border-radius:20px; background:var(--surface); }
+    .empty h2 { margin:0 0 8px; font-size:1.2rem; }
+    .deck-list { display:grid; gap:8px; margin:0 0 14px; }
+    .deck-list[hidden] { display:none; }
+    .deck-option { display:flex; align-items:center; justify-content:space-between; width:100%; text-align:left; }
+    .deck-option small { color:var(--muted); }
+    .folder-note { font-size:.8rem; margin:-4px 0 12px; }
+    @media (max-width:420px) { header { display:block; } .tools { justify-content:start; margin-top:14px; } .actions { grid-template-columns:1fr; } .reveal { grid-row:1; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div><h1>Diário Deutsch</h1><p>Revisão espaçada, uma frase por vez.</p></div>
+      <div class="tools">
+        <button id="phonetic-toggle" aria-pressed="false">Pronúncia: oculta</button>
+        <button id="folder-button" hidden>Escolher pasta</button>
+        <button id="resume-button" hidden>Retomar pasta</button>
+        <label class="file-label" for="deck-file">Importar anki.md</label>
+        <input id="deck-file" type="file" accept=".md,text/markdown,text/plain">
+        <button id="open-button" hidden>Abrir arquivo</button>
+        <button id="save-button" disabled>Salvar / baixar</button>
+      </div>
+    </header>
+    <p id="deck-status">Escolha uma pasta ou importe seu <code>anki.md</code> para começar.</p>
+    <p class="folder-note" id="folder-note" hidden>A pasta é lembrada somente neste navegador. Seus cartões continuam no <code>anki.md</code>.</p>
+    <section class="download-panel" id="download-panel" hidden aria-live="polite"><div class="download-progress"><span id="download-title">Clips de áudio</span><span id="download-count">0/0</span></div><p id="download-note">Aguardando baralho.</p><button id="download-retry" hidden>Tentar novamente</button></section>
+    <div class="deck-list" id="deck-list" hidden aria-label="Baralhos encontrados"></div>
+    <section class="deck" id="deck" aria-live="polite">
+      <div class="drop-zone" id="drop-zone">Arraste <strong>anki.md</strong> aqui<br>ou use “Importar anki.md”.</div>
+    </section>
+    <p class="hint">← Repetir · espaço mostra a resposta · → Lembro</p>
+  </main>
+  <script>
+    (() => {
+      const deckEl = document.querySelector('#deck');
+      const statusEl = document.querySelector('#deck-status');
+      const fileInput = document.querySelector('#deck-file');
+      const openButton = document.querySelector('#open-button');
+      const saveButton = document.querySelector('#save-button');
+      const phoneticToggle = document.querySelector('#phonetic-toggle');
+      const folderButton = document.querySelector('#folder-button');
+      const resumeButton = document.querySelector('#resume-button');
+      const folderNote = document.querySelector('#folder-note');
+      const deckList = document.querySelector('#deck-list');
+      const downloadPanel = document.querySelector('#download-panel');
+      const downloadTitle = document.querySelector('#download-title');
+      const downloadCount = document.querySelector('#download-count');
+      const downloadNote = document.querySelector('#download-note');
+      const downloadRetry = document.querySelector('#download-retry');
+      const uiStateKey = 'diario-deutsch-ui-v1';
+      const defaultUiState = { activeCardId:'', playbackRate:1, loop:false, showPhonetic:false };
+      const readUiState = () => { try { return { ...defaultUiState, ...JSON.parse(localStorage.getItem(uiStateKey) || '{}') }; } catch (_) { return { ...defaultUiState }; } };
+      let uiState = readUiState();
+      const writeUiState = () => { try { localStorage.setItem(uiStateKey, JSON.stringify(uiState)); } catch (_) {} };
+      let deck = null, fileHandle = null, directoryHandle = null, activeAudio = null, activeObjectUrl = '', showPhonetic = uiState.showPhonetic, revealed = false, pointerStart = null;
+      let downloadState = { cards:[], completed:0, failed:[], running:false };
+
+      const toIso = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+      const isoToday = () => toIso(new Date());
+      const addDays = (date, days) => { const d = new Date(date + 'T12:00:00'); d.setDate(d.getDate() + days); return toIso(d); };
+      const addMonths = (date, months) => { const d = new Date(date + 'T12:00:00'); const day = d.getDate(); d.setDate(1); d.setMonth(d.getMonth() + months); d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate())); return toIso(d); };
+      const humanDate = iso => new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR');
+      const esc = value => String(value).replace(/[&<>"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
+
+      function parseMeta(line) {
+        const meta = {};
+        line.replace(/^\s*- Meta:\s*/, '').split(';').forEach(part => {
+          const index = part.indexOf('=');
+          if (index > 0) meta[part.slice(0, index).trim()] = part.slice(index + 1).trim();
+        });
+        return meta;
+      }
+
+      function parseDeck(text) {
+        const lines = text.replace(/\r/g, '').split('\n');
+        const progress = (text.match(/<!-- diario-deutsch-progresso: ([\s\S]*?) -->/) || [, 'modulo=Não definido; aula=Não definida; proximo=Registrar conteúdo'])[1].trim();
+        const groups = [], cards = [];
+        let date = null, group = null;
+        for (let i = 0; i < lines.length; i++) {
+          const header = lines[i].match(/^#(?: Date)?\s+(\d{2}\/\d{2}\/\d{4})\s*$/i);
+          if (header) { date = header[1].split('/').reverse().join('-'); group = { date, cards: [] }; groups.push(group); continue; }
+          const match = lines[i].match(/^-\s*(Frase|Palavra|Gramática)\s+(\d+):\s*(.*?)\s*\|\s*(.*?)\s*$/i);
+          if (!match || !date) continue;
+          const meta = /^\s*- Meta:/.test(lines[i + 1] || '') ? parseMeta(lines[++i]) : {};
+          const type = match[1].toLowerCase();
+          const card = { type, number: Number(match[2]), front: match[3], back: match[4], created: meta.created || date, source: meta.source || 'Sem origem', id: meta.id || `${date}-${type}-${match[2]}`, stage: meta.stage || 'daily', daily: Number(meta.daily || 0), intervalMonths: Number(meta.intervalMonths || 2), next: meta.next || date, video: meta.video || '', start: meta.start || '', end: meta.end || '', audio: meta.audio || '', phonetic: meta.phonetic || '', wordTimes: meta.wordTimes || '', audioSync: meta.audioSync || '', resyncFeedback: meta.resyncFeedback || '', resyncStartHintMs: Number(meta.resyncStartHintMs || 0), resyncEndHintMs: Number(meta.resyncEndHintMs || 0) };
+          group.cards.push(card); cards.push(card);
+        }
+        const audioSource = text.match(/<!-- diario-deutsch-audio-source:\s*base=([^;]+);\s*revision=([^\s;]+)\s*-->/);
+        return { progress, groups, cards, audioBase: audioSource?.[1].trim() || '', audioRevision: audioSource?.[2].trim() || '' };
+      }
+
+      function serializeDeck(currentDeck) {
+        const progressText = currentDeck.progress.split(';').map(item => item.trim()).filter(Boolean);
+        const pretty = Object.fromEntries(progressText.map(item => { const [key, ...value] = item.split('='); return [key, value.join('=').trim()]; }));
+        const groups = [...currentDeck.groups].sort((a,b) => a.date.localeCompare(b.date));
+        let output = '# Anki Deutsch\n\nEste arquivo é a fonte única do seu baralho e do histórico de revisão. Importe-o no `anki.html`, revise os cartões e exporte/salve o arquivo atualizado ao terminar.\n\n## Progresso\n\n';
+        output += `<!-- diario-deutsch-progresso: ${currentDeck.progress} -->\n`;
+        if (currentDeck.audioBase && currentDeck.audioRevision) output += `<!-- diario-deutsch-audio-source: base=${currentDeck.audioBase}; revision=${currentDeck.audioRevision} -->\n`;
+        output += '\n';
+        output += `Você está em **${pretty.modulo || 'módulo não definido'} — ${pretty.aula || 'aula não definida'}**. Próximo passo: ${pretty.proximo || 'registrar conteúdo'}.\n\n## Cartões\n`;
+        for (const group of groups) {
+          if (!group.cards.length) continue;
+          output += `\n# Date ${humanDate(group.date)}\n\n`;
+          group.cards.sort((a,b) => a.number - b.number).forEach(card => {
+            const label = card.type[0].toUpperCase() + card.type.slice(1);
+            output += `- ${label} ${String(card.number).padStart(2,'0')}: ${card.front} | ${card.back}\n`;
+            const media = [card.video && `video=${card.video}`, card.start && `start=${card.start}`, card.end && `end=${card.end}`, card.audio && `audio=${card.audio}`, card.phonetic && `phonetic=${card.phonetic}`, card.wordTimes && `wordTimes=${card.wordTimes}`, card.audioSync && `audioSync=${card.audioSync}`, card.resyncFeedback && `resyncFeedback=${card.resyncFeedback}`, Number.isFinite(card.resyncStartHintMs) && card.resyncStartHintMs && `resyncStartHintMs=${card.resyncStartHintMs}`, Number.isFinite(card.resyncEndHintMs) && card.resyncEndHintMs && `resyncEndHintMs=${card.resyncEndHintMs}`].filter(Boolean);
+            output += `  - Meta: id=${card.id}; type=${card.type}; source=${card.source}; created=${card.created}; stage=${card.stage}; daily=${card.daily}; intervalMonths=${card.intervalMonths}; next=${card.next}${media.length ? `; ${media.join('; ')}` : ''}\n`;
+          });
+        }
+        return output + '\n';
+      }
+
+      const dueCards = () => deck.cards.filter(card => card.next <= isoToday()).sort((a,b) => a.next.localeCompare(b.next) || a.created.localeCompare(b.created));
+      const currentDueCard = () => dueCards().find(card => card.id === uiState.activeCardId) || dueCards()[0];
+      function showStatus() { const due = dueCards().length; statusEl.textContent = due ? `${due} cartão${due === 1 ? '' : 'ões'} para revisar hoje.` : 'Nenhum cartão vencido. Continue amanhã ou importe outro baralho.'; saveButton.disabled = !deck; }
+      function empty(message, title = 'Tudo revisado') { deckEl.innerHTML = `<div class="empty"><h2>${esc(title)}</h2><p>${esc(message)}</p></div>`; }
+      function updatePhoneticToggle() { phoneticToggle.textContent = `Pronúncia: ${showPhonetic ? 'visível' : 'oculta'}`; phoneticToggle.setAttribute('aria-pressed', String(showPhonetic)); }
+      const wordsOf = text => text.trim().split(/\s+/).filter(Boolean);
+      function parseWordTimes(value, wordCount) {
+        const times = String(value || '').split('|').filter(Boolean).map(item => {
+          const match = item.trim().match(/^(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)$/);
+          if (!match) return null;
+          const start = Number(match[1]), end = Number(match[2]);
+          return Number.isFinite(start) && Number.isFinite(end) && start >= 0 && end > start ? { start, end } : null;
+        });
+        return times.length === wordCount && times.every(Boolean) ? times : [];
+      }
+      function questionMarkup(card) {
+        const words = wordsOf(card.front), sounds = wordsOf(card.phonetic), wordTimes = parseWordTimes(card.wordTimes, words.length);
+        const pairs = words.map((word, index) => {
+          const karaoke = wordTimes.length ? `<span class="karaoke-word" data-word-index="${index}">${esc(word)}</span>` : esc(word);
+          const phonetic = card.phonetic && words.length === sounds.length ? `<span class="phonetic-word" ${showPhonetic ? '' : 'hidden'}>${esc(sounds[index])}</span>` : '';
+          return `<span class="word-pair">${karaoke}${phonetic}</span>`;
+        }).join('');
+        return `<div class="question">${pairs}</div>`;
+      }
+      function stopAudio() { if (activeAudio) { activeAudio.pause(); activeAudio.currentTime = 0; activeAudio = null; } if (activeObjectUrl) { URL.revokeObjectURL(activeObjectUrl); activeObjectUrl = ''; } }
+      function audioMarkup(card) {
+        if (!card.audio) return card.video ? `<p class="audio-source">Fonte: <a href="${esc(card.video)}" target="_blank" rel="noreferrer">abrir vídeo</a> · clip ainda não gerado.</p>` : '';
+        const source = card.video ? ` · <a href="${esc(card.video)}" target="_blank" rel="noreferrer">vídeo original</a>` : '';
+        const range = card.start && card.end ? `${esc(card.start)}–${esc(card.end)}` : 'clip local';
+        const synced = parseWordTimes(card.wordTimes, wordsOf(card.front).length).length > 0;
+        const syncState = synced ? 'Karaoke sincronizado' : 'Karaoke sem sincronismo';
+        const startHint = Number.isFinite(card.resyncStartHintMs) ? card.resyncStartHintMs : 0, endHint = Number.isFinite(card.resyncEndHintMs) ? card.resyncEndHintMs : 0;
+        const hints = card.resyncFeedback === 'reajustar' ? `<div class="resync-hints"><div class="resync-hint"><span>Começo</span><button data-resync-hint="start" data-delta="-50">−50</button><output id="resync-start-hint">${startHint > 0 ? '+' : ''}${startHint} ms</output><button data-resync-hint="start" data-delta="50">+50</button></div><div class="resync-hint"><span>Fim</span><button data-resync-hint="end" data-delta="-50">−50</button><output id="resync-end-hint">${endHint > 0 ? '+' : ''}${endHint} ms</output><button data-resync-hint="end" data-delta="50">+50</button></div></div>` : '';
+        return `<section class="audio-player"><div class="audio-head"><span>Áudio do trecho</span><span>${range}</span></div><audio id="card-audio" preload="metadata"></audio><div class="audio-controls"><button id="audio-play">Play</button><button id="audio-loop">Repetir: não</button><button class="audio-rate" data-rate="0.5">0,5×</button><button class="audio-rate" data-rate="1">1,0×</button></div><div class="resync-feedback" aria-label="Resync feedback"><button class="${card.resyncFeedback === 'perfect-sync' ? 'active' : ''}" data-resync-feedback="perfect-sync">👍 Perfect sync</button><button class="adjust ${card.resyncFeedback === 'reajustar' ? 'active' : ''}" data-resync-feedback="reajustar">👎 Reajustar</button></div>${hints}<div class="audio-source"><span class="sync-state${synced ? '' : ' missing'}">${syncState}</span> · ${esc(card.audio)}${source}</div></section>`;
+      }
+      function setupAudioPlayer(card) {
+        const audio = document.querySelector('#card-audio'); if (!audio) return;
+        activeAudio = audio;
+        const play = document.querySelector('#audio-play'), loop = document.querySelector('#audio-loop');
+        audio.loop = uiState.loop; audio.playbackRate = uiState.playbackRate;
+        loop.classList.toggle('active', audio.loop); loop.textContent = `Repetir: ${audio.loop ? 'sim' : 'não'}`;
+        document.querySelectorAll('.audio-rate').forEach(button => button.classList.toggle('active', Number(button.dataset.rate) === audio.playbackRate));
+        void setAudioSource(card, audio);
+        const wordTimes = parseWordTimes(card.wordTimes, wordsOf(card.front).length);
+        const karaokeWords = [...document.querySelectorAll('.karaoke-word')];
+        let karaokeFrame = null;
+        const updateKaraoke = () => {
+          karaokeWords.forEach((word, index) => {
+            const time = wordTimes[index];
+            if (!time) return;
+            const progress = Math.max(0, Math.min(1, (audio.currentTime - time.start) / (time.end - time.start)));
+            word.style.setProperty('--karaoke-fill', `${(progress * 100).toFixed(1)}%`);
+          });
+        };
+        const animateKaraoke = () => { updateKaraoke(); if (!audio.paused) karaokeFrame = requestAnimationFrame(animateKaraoke); };
+        const startKaraoke = () => { if (!wordTimes.length) return; cancelAnimationFrame(karaokeFrame); animateKaraoke(); };
+        const syncPlay = () => { play.textContent = audio.paused ? 'Play' : 'Pause'; };
+        play.addEventListener('click', async () => { try { if (audio.paused) await audio.play(); else audio.pause(); } catch (_) { statusEl.textContent = 'Não foi possível tocar o clip. Verifique se o arquivo existe em audio/.'; } syncPlay(); });
+        audio.addEventListener('play', () => { syncPlay(); startKaraoke(); });
+        audio.addEventListener('pause', () => { syncPlay(); cancelAnimationFrame(karaokeFrame); });
+        audio.addEventListener('seeking', updateKaraoke);
+        audio.addEventListener('timeupdate', updateKaraoke);
+        updateKaraoke();
+        audio.addEventListener('error', () => { statusEl.textContent = 'Clip de áudio não encontrado. Gere-o novamente ou confira o caminho no anki.md.'; });
+        loop.addEventListener('click', () => { audio.loop = !audio.loop; uiState.loop = audio.loop; writeUiState(); loop.classList.toggle('active', audio.loop); loop.textContent = `Repetir: ${audio.loop ? 'sim' : 'não'}`; });
+        document.querySelectorAll('.audio-rate').forEach(button => button.addEventListener('click', () => { audio.playbackRate = Number(button.dataset.rate); uiState.playbackRate = audio.playbackRate; writeUiState(); document.querySelectorAll('.audio-rate').forEach(item => item.classList.toggle('active', item === button)); }));
+      }
+
+      const dbRequest = request => new Promise((resolve, reject) => { request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); });
+      const transactionDone = transaction => new Promise((resolve, reject) => { transaction.oncomplete = () => resolve(); transaction.onerror = () => reject(transaction.error); transaction.onabort = () => reject(transaction.error); });
+      function openFolderDatabase() {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open('diario-deutsch', 2);
+          request.onupgradeneeded = () => { if (!request.result.objectStoreNames.contains('settings')) request.result.createObjectStore('settings'); if (!request.result.objectStoreNames.contains('audio')) request.result.createObjectStore('audio'); };
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      }
+      async function rememberDirectory(handle) {
+        if (!('indexedDB' in window)) return;
+        const database = await openFolderDatabase();
+        const transaction = database.transaction('settings', 'readwrite');
+        transaction.objectStore('settings').put(handle, 'last-directory');
+        await transactionDone(transaction);
+        database.close();
+      }
+      async function rememberedDirectory() {
+        if (!('indexedDB' in window)) return null;
+        const database = await openFolderDatabase();
+        const transaction = database.transaction('settings', 'readonly');
+        const handle = await dbRequest(transaction.objectStore('settings').get('last-directory'));
+        database.close();
+        return handle || null;
+      }
+      const audioCacheKey = card => `${deck?.audioBase || ''}|${deck?.audioRevision || ''}|${card.audio}`;
+      const audioUrl = card => deck?.audioBase ? `${deck.audioBase.replace(/\/$/, '')}/${card.audio.replace(/^\//, '')}?v=${encodeURIComponent(deck.audioRevision)}` : '';
+      async function cachedAudio(card) {
+        if (!deck?.audioBase || !('indexedDB' in window)) return null;
+        const database = await openFolderDatabase();
+        const transaction = database.transaction('audio', 'readonly');
+        const record = await dbRequest(transaction.objectStore('audio').get(audioCacheKey(card)));
+        database.close();
+        return record?.blob || null;
+      }
+      async function cacheAudio(card, blob) {
+        const database = await openFolderDatabase();
+        const transaction = database.transaction('audio', 'readwrite');
+        transaction.objectStore('audio').put({ base:deck.audioBase, revision:deck.audioRevision, path:card.audio, blob }, audioCacheKey(card));
+        await transactionDone(transaction); database.close();
+      }
+      async function setAudioSource(card, audio) {
+        try {
+          const blob = await cachedAudio(card);
+          if (audio !== activeAudio) return;
+          if (blob) { activeObjectUrl = URL.createObjectURL(blob); audio.src = activeObjectUrl; }
+          else audio.src = audioUrl(card) || card.audio;
+          audio.load();
+        } catch (_) { audio.src = audioUrl(card) || card.audio; audio.load(); }
+      }
+      async function fetchAudioWithRetry(card, attempts = 3) {
+        const url = audioUrl(card); if (!url) throw new Error('Fonte HTTPS não configurada.');
+        let lastError;
+        for (let attempt = 0; attempt < attempts; attempt++) {
+          try { const response = await fetch(url); if (!response.ok) throw new Error(`HTTP ${response.status}`); const blob = await response.blob(); if (!blob.size) throw new Error('Arquivo vazio.'); return blob; }
+          catch (error) { lastError = error; if (attempt < attempts - 1) await new Promise(resolve => setTimeout(resolve, 400 * 2 ** attempt)); }
+        }
+        throw lastError;
+      }
+      function renderDownloadState() {
+        const state = downloadState; downloadPanel.hidden = !state.cards.length;
+        if (!state.cards.length) return;
+        downloadCount.textContent = `${state.completed}/${state.cards.length}`;
+        downloadNote.textContent = state.running ? 'Baixando e salvando clips para uso offline…' : state.failed.length ? `${state.failed.length} clip(s) falharam.` : 'Clips disponíveis offline neste navegador.';
+        downloadRetry.hidden = !state.failed.length || state.running;
+        downloadRetry.textContent = `Tentar novamente (${state.failed.length})`;
+      }
+      async function startAudioDownloads(cards = deck?.cards.filter(card => card.audio) || []) {
+        if (!deck?.audioBase || downloadState.running) return;
+        const missing = [];
+        for (const card of cards) if (!(await cachedAudio(card))) missing.push(card);
+        downloadState = { cards:deck.cards.filter(card => card.audio), completed:deck.cards.filter(card => card.audio).length - missing.length, failed:[], running:true };
+        renderDownloadState();
+        const queue = [...missing];
+        const worker = async () => { while (queue.length) { const card = queue.shift(); try { await cacheAudio(card, await fetchAudioWithRetry(card)); downloadState.completed++; } catch (_) { downloadState.failed.push(card); } renderDownloadState(); } };
+        await Promise.all(Array.from({ length:Math.min(3, queue.length) }, worker));
+        downloadState.running = false; renderDownloadState();
+      }
+      async function permissionForDirectory(handle, ask = false) {
+        const options = { mode: 'readwrite' };
+        let permission = await handle.queryPermission(options);
+        if (permission !== 'granted' && ask) permission = await handle.requestPermission(options);
+        return permission === 'granted';
+      }
+      function renderDeckList(entries) {
+        deckList.innerHTML = '';
+        deckList.hidden = !entries.length;
+        for (const entry of entries) {
+          const button = document.createElement('button');
+          button.className = 'deck-option';
+          button.innerHTML = `<span>${esc(entry.name)}</span><small>Abrir</small>`;
+          button.addEventListener('click', async () => {
+            try { const file = await entry.handle.getFile(); fileHandle = entry.handle; loadText(await file.text(), entry.name); }
+            catch (_) { statusEl.textContent = 'Não foi possível abrir este anki.md.'; }
+          });
+          deckList.append(button);
+        }
+      }
+      async function listDirectoryDecks() {
+        if (!directoryHandle) return;
+        const entries = [];
+        for await (const [name, handle] of directoryHandle.entries()) {
+          if (handle.kind === 'file' && name.toLowerCase() === 'anki.md') entries.push({ name, handle });
+        }
+        renderDeckList(entries);
+        folderNote.hidden = false;
+        statusEl.textContent = entries.length ? `${entries.length} anki.md encontrado nesta pasta.` : 'Nenhum anki.md foi encontrado nesta pasta.';
+      }
+      async function chooseDirectory() {
+        try {
+          directoryHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+          await rememberDirectory(directoryHandle);
+          resumeButton.hidden = true;
+          await listDirectoryDecks();
+        } catch (error) {
+          if (error.name !== 'AbortError') statusEl.textContent = 'Não foi possível acessar a pasta.';
+        }
+      }
+      async function resumeDirectory() {
+        if (!directoryHandle) return;
+        try {
+          if (await permissionForDirectory(directoryHandle, true)) { resumeButton.hidden = true; await listDirectoryDecks(); }
+          else statusEl.textContent = 'A permissão para essa pasta não foi concedida.';
+        } catch (_) { statusEl.textContent = 'Não foi possível retomar a pasta. Escolha-a novamente.'; }
+      }
+      async function restoreDirectory() {
+        try {
+          directoryHandle = await rememberedDirectory();
+          if (!directoryHandle) return;
+          folderNote.hidden = false;
+          if (await permissionForDirectory(directoryHandle)) await listDirectoryDecks();
+          else { resumeButton.hidden = false; statusEl.textContent = 'A última pasta foi lembrada. Clique em “Retomar pasta” para autorizar o acesso.'; }
+        } catch (_) { directoryHandle = null; }
+      }
+
+      function render() {
+        stopAudio();
+        if (!deck) { deckEl.innerHTML = '<div class="drop-zone" id="drop-zone">Arraste <strong>anki.md</strong> aqui<br>ou use “Importar anki.md”.</div>'; bindDropZone(); return; }
+        const card = currentDueCard(); showStatus();
+        if (!card) { empty('O seu próximo cartão aparecerá na data programada. Salve o anki.md antes de sair.'); return; }
+        uiState.activeCardId = card.id; writeUiState();
+        revealed = false;
+        const label = card.type[0].toUpperCase() + card.type.slice(1);
+        deckEl.innerHTML = `<article class="card" id="card"><div><div class="tag">${esc(label)} · revisão ${card.daily}/30</div>${questionMarkup(card)}<div class="answer" id="answer" hidden>${esc(card.back)}</div></div><div class="source">${esc(card.source)} · próximo: ${humanDate(card.next)}</div></article>${audioMarkup(card)}<div class="actions"><button class="again" id="again">← Repetir</button><button class="reveal" id="reveal">Mostrar resposta</button><button class="known" id="known">Lembro →</button></div>`;
+        const cardEl = document.querySelector('#card');
+        document.querySelector('#reveal').addEventListener('click', reveal);
+        document.querySelector('#again').addEventListener('click', () => grade(false));
+        document.querySelector('#known').addEventListener('click', () => grade(true));
+        const persistFeedback = async () => { if (fileHandle?.createWritable) await saveDeck(); else statusEl.textContent += ' Use “Salvar / baixar” para persistir no anki.md.'; };
+        document.querySelectorAll('[data-resync-feedback]').forEach(button => button.addEventListener('click', async () => {
+          card.resyncFeedback = button.dataset.resyncFeedback;
+          if (card.resyncFeedback === 'reajustar') { card.resyncStartHintMs = Number.isFinite(card.resyncStartHintMs) ? card.resyncStartHintMs : 0; card.resyncEndHintMs = Number.isFinite(card.resyncEndHintMs) ? card.resyncEndHintMs : 0; }
+          statusEl.textContent = `Resync feedback marcado: ${card.resyncFeedback}.`;
+          await persistFeedback(); render();
+        }));
+        document.querySelectorAll('[data-resync-hint]').forEach(button => button.addEventListener('click', async () => {
+          const key = button.dataset.resyncHint === 'start' ? 'resyncStartHintMs' : 'resyncEndHintMs';
+          card[key] = Math.max(-500, Math.min(500, Number(card[key] || 0) + Number(button.dataset.delta)));
+          statusEl.textContent = `Guia de ${button.dataset.resyncHint === 'start' ? 'começo' : 'fim'}: ${card[key] > 0 ? '+' : ''}${card[key]} ms.`;
+          await persistFeedback(); render();
+        }));
+        setupAudioPlayer(card);
+        cardEl.addEventListener('pointerdown', event => { pointerStart = { x:event.clientX, y:event.clientY }; cardEl.setPointerCapture(event.pointerId); });
+        cardEl.addEventListener('pointerup', event => { if (!pointerStart) return; const dx = event.clientX - pointerStart.x; pointerStart = null; if (Math.abs(dx) > 95) grade(dx > 0); });
+      }
+      function reveal() { const answer = document.querySelector('#answer'); if (answer) answer.hidden = false; revealed = true; document.querySelector('#reveal').textContent = 'Resposta mostrada'; }
+      function grade(known) {
+        const card = currentDueCard(); if (!card) return;
+        stopAudio();
+        const today = isoToday();
+        if (known) {
+          if (card.stage === 'daily') {
+            card.daily += 1;
+            if (card.daily >= 30) { card.stage = 'monthly'; card.intervalMonths = 2; card.next = addMonths(today, 2); }
+            else card.next = addDays(today, 1);
+          } else { card.intervalMonths = Math.max(2, card.intervalMonths || 2) + 1; card.next = addMonths(today, card.intervalMonths); }
+        } else { card.stage = 'daily'; card.daily = 0; card.intervalMonths = 2; card.next = addDays(today, 1); }
+        const cardEl = document.querySelector('#card');
+        uiState.activeCardId = ''; writeUiState();
+        if (cardEl) { cardEl.classList.add(known ? 'swipe-right' : 'swipe-left'); setTimeout(render, 230); } else render();
+      }
+      function loadText(text, name = 'anki.md') { try { deck = parseDeck(text); if (!deck.cards.length) { showStatus(); empty('Ainda não há cartões. Peça à skill Diário Deutsch para registrar frases, palavras ou gramática.', 'Baralho vazio'); return; } statusEl.textContent = `${name} importado.`; render(); void startAudioDownloads(); } catch (error) { deck = null; statusEl.textContent = 'Não foi possível ler este arquivo.'; empty(error.message, 'Formato inválido'); } }
+      async function openWithPicker() { try { [fileHandle] = await window.showOpenFilePicker({ types:[{ description:'Markdown', accept:{ 'text/markdown':['.md'], 'text/plain':['.md'] } }] }); const file = await fileHandle.getFile(); loadText(await file.text(), file.name); } catch (error) { if (error.name !== 'AbortError') statusEl.textContent = 'Não foi possível abrir o arquivo.'; } }
+      async function saveDeck() { if (!deck) return; const contents = serializeDeck(deck); try { if (fileHandle?.createWritable) { const writable = await fileHandle.createWritable(); await writable.write(contents); await writable.close(); statusEl.textContent = 'anki.md salvo com o histórico atualizado.'; if (directoryHandle) await listDirectoryDecks(); return; } } catch (_) { statusEl.textContent = 'Não foi possível gravar diretamente; o download foi preparado.'; }
+        const url = URL.createObjectURL(new Blob([contents], {type:'text/markdown;charset=utf-8'})); const link = Object.assign(document.createElement('a'), {href:url, download:'anki.md'}); link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+      function bindDropZone() { const zone = document.querySelector('#drop-zone'); if (!zone) return; ['dragenter','dragover'].forEach(type => zone.addEventListener(type, event => { event.preventDefault(); zone.classList.add('drag'); })); ['dragleave','drop'].forEach(type => zone.addEventListener(type, event => { event.preventDefault(); zone.classList.remove('drag'); })); zone.addEventListener('drop', event => { const file = event.dataTransfer.files[0]; if (file) file.text().then(text => loadText(text, file.name)); }); }
+      fileInput.addEventListener('change', event => { const file = event.target.files[0]; if (file) { fileHandle = null; file.text().then(text => loadText(text, file.name)); } });
+      saveButton.addEventListener('click', saveDeck);
+      downloadRetry.addEventListener('click', () => { const failed = [...downloadState.failed]; downloadState.failed = []; void startAudioDownloads(failed); });
+      phoneticToggle.addEventListener('click', () => { showPhonetic = !showPhonetic; uiState.showPhonetic = showPhonetic; writeUiState(); updatePhoneticToggle(); document.querySelectorAll('.phonetic-word').forEach(item => item.hidden = !showPhonetic); });
+      updatePhoneticToggle();
+      if ('showOpenFilePicker' in window) { openButton.hidden = false; openButton.addEventListener('click', openWithPicker); }
+      if ('showDirectoryPicker' in window) { folderButton.hidden = false; folderButton.addEventListener('click', chooseDirectory); resumeButton.addEventListener('click', resumeDirectory); restoreDirectory(); }
+      window.addEventListener('keydown', event => { if (!deck || ['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return; if (event.key === 'ArrowRight') { event.preventDefault(); grade(true); } if (event.key === 'ArrowLeft') { event.preventDefault(); grade(false); } if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); reveal(); } });
+      bindDropZone();
+    })();
+  </script>
+</body>
+</html>
