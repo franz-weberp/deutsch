@@ -112,6 +112,7 @@
     .audio-meta .resync-feedback button + button { border-left:1px solid var(--line); }
     .audio-meta .resync-feedback button.active { color:var(--accent); background:rgba(144,214,174,.08); }
     .audio-meta .resync-feedback button.adjust.active { color:#f0c078; background:rgba(240,192,120,.08); }
+    .audio-meta .resync-feedback button.adjust.needs-analysis { color:#f0c078; border-left-color:rgba(240,192,120,.5); background:rgba(240,192,120,.08); }
     .audio-meta .resync-feedback svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:1.9; }
     .audio-meta .resync-hints { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) 32px 40px; grid-template-rows:32px 56px 0; align-items:center; justify-content:space-between; column-gap:0; row-gap:0; min-height:120px; overflow:hidden; padding:16px; border-top:1px solid var(--line); border-radius:12px; background:rgba(25,27,32,.7); transition:grid-template-rows .3s cubic-bezier(.2,.75,.25,1), min-height .3s cubic-bezier(.2,.75,.25,1); }
     .audio-meta .resync-hints.has-confirmation { grid-template-rows:32px 56px 104px; min-height:224px; }
@@ -123,6 +124,7 @@
     .adjust-value { display:grid; place-items:center; width:64px; height:32px; color:var(--ink); font-size:.78rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
     .resync-unknown, .resync-save { display:grid; place-items:center; width:32px; height:32px; padding:0; border-radius:50%; line-height:0; }
     .resync-unknown { grid-column:3; color:#f0c078; border-color:rgba(240,192,120,.55); background:rgba(240,192,120,.06); }
+    .resync-unknown.active { color:#f5cf8d; border-color:rgba(240,192,120,.9); background:rgba(240,192,120,.14); }
     .resync-save { grid-column:4; margin-left:8px; color:var(--muted); }
     .resync-unknown svg, .resync-save svg { display:block; width:17px; height:17px; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:1.9; }
     .resync-save.pending { color:var(--accent); border-color:rgba(144,214,174,.65); background:rgba(144,214,174,.08); }
@@ -265,6 +267,7 @@
           const meta = /^\s*- Meta:/.test(lines[i + 1] || '') ? parseMeta(lines[++i]) : {};
           const type = match[1].toLowerCase();
           const card = { type, number: Number(match[2]), front: match[3], back: match[4], created: meta.created || date, source: meta.source || 'Sem origem', id: meta.id || `${date}-${type}-${match[2]}`, stage: meta.stage || 'daily', daily: Number(meta.daily || 0), intervalMonths: Number(meta.intervalMonths || 2), next: meta.next || date, video: meta.video || '', start: meta.start || '', end: meta.end || '', audio: meta.audio || '', phonetic: meta.phonetic || '', wordTimes: meta.wordTimes || '', audioSync: meta.audioSync || '', resyncFeedback: meta.resyncFeedback || '', resyncStartHintMs: Number(meta.resyncStartHintMs || 0), resyncEndHintMs: Number(meta.resyncEndHintMs || 0) };
+          card.resyncAnalysis = meta.resyncAnalysis || '';
           group.cards.push(card); cards.push(card);
         }
         const audioSource = text.match(/<!-- diario-deutsch-audio-source:\s*base=([^;]+);\s*revision=([^\s;]+)\s*-->/);
@@ -286,7 +289,7 @@
           group.cards.sort((a,b) => a.number - b.number).forEach(card => {
             const label = card.type[0].toUpperCase() + card.type.slice(1);
             output += `- ${label} ${String(card.number).padStart(2,'0')}: ${card.front} | ${card.back}\n`;
-            const media = [card.video && `video=${card.video}`, card.start && `start=${card.start}`, card.end && `end=${card.end}`, card.audio && `audio=${card.audio}`, card.phonetic && `phonetic=${card.phonetic}`, card.wordTimes && `wordTimes=${card.wordTimes}`, card.audioSync && `audioSync=${card.audioSync}`, card.resyncFeedback && `resyncFeedback=${card.resyncFeedback}`, Number.isFinite(card.resyncStartHintMs) && card.resyncStartHintMs && `resyncStartHintMs=${card.resyncStartHintMs}`, Number.isFinite(card.resyncEndHintMs) && card.resyncEndHintMs && `resyncEndHintMs=${card.resyncEndHintMs}`].filter(Boolean);
+            const media = [card.video && `video=${card.video}`, card.start && `start=${card.start}`, card.end && `end=${card.end}`, card.audio && `audio=${card.audio}`, card.phonetic && `phonetic=${card.phonetic}`, card.wordTimes && `wordTimes=${card.wordTimes}`, card.audioSync && `audioSync=${card.audioSync}`, card.resyncFeedback && `resyncFeedback=${card.resyncFeedback}`, card.resyncAnalysis && `resyncAnalysis=${card.resyncAnalysis}`, Number.isFinite(card.resyncStartHintMs) && card.resyncStartHintMs && `resyncStartHintMs=${card.resyncStartHintMs}`, Number.isFinite(card.resyncEndHintMs) && card.resyncEndHintMs && `resyncEndHintMs=${card.resyncEndHintMs}`].filter(Boolean);
             output += `  - Meta: id=${card.id}; type=${card.type}; source=${card.source}; created=${card.created}; stage=${card.stage}; daily=${card.daily}; intervalMonths=${card.intervalMonths}; next=${card.next}${media.length ? `; ${media.join('; ')}` : ''}\n`;
           });
         }
@@ -350,7 +353,7 @@
           return `<div class="resync-hint"><span>${label}</span><div class="adjust-control"><button type="button" data-resync-hint="${key}" data-delta="-50" aria-label="Diminuir ${label} em 50 milissegundos">−</button><output class="adjust-value">${value > 0 ? '+' : ''}${value} ms</output><button type="button" data-resync-hint="${key}" data-delta="50" aria-label="Aumentar ${label} em 50 milissegundos">+</button></div></div>`;
         };
         const unknownConfirmation = resyncConfirmMode === 'unknown';
-        const confirmationText = unknownConfirmation ? 'Resync necessário' : 'Salvar ajustes de sync?';
+        const confirmationText = unknownConfirmation ? 'Análise aprofundada necessária' : 'Salvar ajustes de sync?';
         const confirmationAction = unknownConfirmation ? 'Confirmar' : 'Salvar';
         return `<div class="resync-hints${resyncPanelOpen ? '' : ' is-concealed'}" id="resync-hints" aria-hidden="${String(!resyncPanelOpen)}">${adjustment('Começo', 'start', startHint)}${adjustment('Fim', 'end', endHint)}<button type="button" class="resync-unknown" id="resync-unknown" aria-label="Marcar resync necessário sem indicar correção" title="Resync necessário">${syncIcon('unknown')}</button><button type="button" class="resync-save${resyncDirty ? ' pending' : ''}" id="resync-save" ${resyncDirty ? '' : 'disabled'} aria-label="Salvar ajustes de sincronismo" title="Salvar ajustes de sincronismo" aria-expanded="${String(resyncConfirmOpen)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5zM8 3v6h8V3M8 21v-7h8v7"></path></svg></button><div class="clip-waveform" id="resync-waveform" aria-hidden="true" style="--clip-start:${bounds.start}%;--clip-end:${bounds.end}%"><svg class="wave-base" viewBox="0 0 380 38" preserveAspectRatio="none">${waveformBars}</svg><svg class="wave-fill" viewBox="0 0 380 38" preserveAspectRatio="none">${waveformBars}</svg></div><div class="resync-confirm${resyncConfirmOpen ? '' : ' is-concealed'}" id="resync-confirm" role="group" aria-label="${confirmationText}" aria-hidden="${String(!resyncConfirmOpen)}"><p>${confirmationText}</p><div class="resync-confirm-actions"><button type="button" id="resync-cancel">Cancelar</button><button type="button" class="confirm" id="resync-confirm-save">${confirmationAction}</button></div></div></div>`;
       }
@@ -390,11 +393,19 @@
         }
         const perfect = document.querySelector('[data-resync-feedback="perfect-sync"]');
         const adjust = document.querySelector('[data-resync-feedback="reajustar"]');
+        const unknown = document.querySelector('#resync-unknown');
         perfect?.classList.toggle('active', card.resyncFeedback === 'perfect-sync');
         adjust?.classList.toggle('active', card.resyncFeedback === 'reajustar');
+        adjust?.classList.toggle('needs-analysis', card.resyncFeedback === 'needs-analysis');
+        unknown?.classList.toggle('active', card.resyncFeedback === 'needs-analysis');
+        if (unknown) {
+          unknown.setAttribute('aria-label', 'Marcar análise aprofundada necessária');
+          unknown.title = 'Análise aprofundada necessária';
+        }
         if (adjust) {
-          adjust.setAttribute('aria-label', resyncPanelOpen ? 'Fechar ajuste de sincronismo' : 'Abrir ajuste de sincronismo');
-          adjust.title = resyncPanelOpen ? 'Fechar ajuste' : 'Ajustar sincronismo';
+          const needsAnalysis = card.resyncFeedback === 'needs-analysis';
+          adjust.setAttribute('aria-label', resyncPanelOpen ? 'Fechar ajuste de sincronismo' : (needsAnalysis ? 'Abrir análise aprofundada' : 'Abrir ajuste de sincronismo'));
+          adjust.title = resyncPanelOpen ? 'Fechar ajuste' : (needsAnalysis ? 'Análise aprofundada necessária' : 'Ajustar sincronismo');
         }
         const save = document.querySelector('#resync-save');
         if (save) {
@@ -405,7 +416,7 @@
         const confirmation = document.querySelector('#resync-confirm');
         if (confirmation) {
           const unknownConfirmation = resyncConfirmMode === 'unknown';
-          const message = unknownConfirmation ? 'Resync necessário' : 'Salvar ajustes de sync?';
+          const message = unknownConfirmation ? 'Análise aprofundada necessária' : 'Salvar ajustes de sync?';
           confirmation.classList.toggle('is-concealed', !resyncConfirmOpen);
           confirmation.setAttribute('aria-label', message);
           confirmation.setAttribute('aria-hidden', String(!resyncConfirmOpen));
@@ -655,6 +666,7 @@
           const feedback = button.dataset.resyncFeedback;
           if (feedback === 'perfect-sync') {
             card.resyncFeedback = 'perfect-sync';
+            card.resyncAnalysis = '';
             card.resyncStartHintMs = 0;
             card.resyncEndHintMs = 0;
             resyncPanelOpen = false;
@@ -665,7 +677,7 @@
             showResyncToast('Sync perfeito!');
             return;
           }
-          if (feedback === 'reajustar' && card.resyncFeedback === 'reajustar') {
+          if (feedback === 'reajustar' && ['reajustar', 'needs-analysis'].includes(card.resyncFeedback)) {
             resyncPanelOpen = !resyncPanelOpen;
             resyncConfirmOpen = false;
             resyncConfirmMode = '';
@@ -674,6 +686,7 @@
           }
           card.resyncFeedback = feedback;
           if (feedback === 'reajustar') {
+            card.resyncAnalysis = '';
             card.resyncStartHintMs = Number.isFinite(card.resyncStartHintMs) ? card.resyncStartHintMs : 0;
             card.resyncEndHintMs = Number.isFinite(card.resyncEndHintMs) ? card.resyncEndHintMs : 0;
             resyncPanelOpen = true;
@@ -685,6 +698,10 @@
         }));
         document.querySelectorAll('[data-resync-hint]').forEach(button => button.addEventListener('click', () => {
           const key = button.dataset.resyncHint === 'start' ? 'resyncStartHintMs' : 'resyncEndHintMs';
+          if (card.resyncFeedback === 'needs-analysis') {
+            card.resyncFeedback = 'reajustar';
+            card.resyncAnalysis = '';
+          }
           card[key] = Math.max(-500, Math.min(500, Number(card[key] || 0) + Number(button.dataset.delta)));
           resyncDirty = true;
           resyncConfirmOpen = false;
@@ -711,7 +728,8 @@
         document.querySelector('#resync-confirm-save')?.addEventListener('click', async () => {
           const isUnknownResync = resyncConfirmMode === 'unknown';
           if (isUnknownResync) {
-            card.resyncFeedback = 'reajustar';
+            card.resyncFeedback = 'needs-analysis';
+            card.resyncAnalysis = '';
             card.resyncStartHintMs = 0;
             card.resyncEndHintMs = 0;
             resyncDirty = true;
@@ -723,8 +741,9 @@
           resyncConfirmOpen = false;
           resyncConfirmMode = '';
           updateResyncUi(card);
-          showResyncToast(result === 'written' ? (isUnknownResync ? 'Resync necessário salvo no anki.md.' : 'Resync salvo no anki.md.') : 'anki.md atualizado e baixado.');
+          showResyncToast(result === 'written' ? (isUnknownResync ? 'Análise aprofundada necessária salva no anki.md.' : 'Resync salvo no anki.md.') : 'anki.md atualizado e baixado.');
         });
+        updateResyncUi(card);
         setupAudioPlayer(card);
         cardEl.addEventListener('pointerdown', event => {
           if (event.target.closest('button, a, input, label')) { pointerStart = null; return; }
